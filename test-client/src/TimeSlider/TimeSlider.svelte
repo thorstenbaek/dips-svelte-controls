@@ -24,36 +24,75 @@
 
     function move(e) {                
         const width = range[1] - range[0];
-        range[0] = e;
-        range[1] = e + width;
+        if ((e >= min) && ((e + width) <= max)) {
+            range[0] = e;
+            range[1] = e + width;
+        }        
     }
 
-    $: min, max, clamp()    
-    function clamp() {
+    function toPercent(r) {
+        //const width = max - min;
+
+        //return (min + r)/width * 100;
+        return r * 100;
+    }
+
+    $: clamp(min, max)    
+    function clamp(mi, ma) {
         setStart(start);
         setEnd(end);
     }
 
 </script>
 
-<div class="track">
-    <div use:pan on:pan={e => move(e.detail)} style={`left:${range[0]*100}%;width:${(range[1]-range[0])*100}%`} class="range"/>
-    <div use:pan on:pan={e => start = e.detail} class="thumb" style={`left:${range[0]*100}%`}>
-        <div class="thumb-content"/>
+<div class="slider">
+    <div on:click={e => min--} class="button left">◀</div>
+    <div class="track">
+        <div use:pan on:pan={e => move(e.detail)} style={`left:${toPercent(range[0])}%;width:${toPercent(range[1]-range[0])}%`} class="range"/>
+        <div use:pan on:pan={e => start = e.detail} class="thumb" style={`left:${toPercent(range[0])}%`}>
+            <div class="thumb-content"/>
+        </div>
+        <div use:pan on:pan={e => end = e.detail} class="thumb" style={`left:${toPercent(range[1])}%`}>
+            <div class="thumb-content"/>
+        </div>
     </div>
-    <div use:pan on:pan={e => end = e.detail} class="thumb" style={`left:${range[1]*100}%`}>
-        <div class="thumb-content"/>
-    </div>
+    <div on:click={e => max++} class="button right">▶</div>
 </div>
 
-Range: {range[0]*100}, {range[1]*100}
+<p>
+    Range: {range[0]*100}, {range[1]*100}
+</p>    
+<p>
+    Min/Max: {min*100}, {max*100}
+</p>
 
 <style>
-    .track { 
-        margin: 24px;
+    .slider {
+        position: relative;                               
+    }
+
+    .button {
+        font-size: 24px;
+        color: rgba(200, 200, 200, 0.5);
+        position: absolute;   
+        top: -12px;
+        height: 24px;
+        -webkit-user-select: none;
+    }
+
+    .left {
+        left: 0;
+    }
+
+    .right {
+        right: 0;
+    }
+
+    .track {                 
+        margin: 30px;
         position: relative;               
         height: 8px;
-        width: calc(100% - 48px);
+        width: calc(100% - 60px);
         background: rgba(200, 200, 200, 0.5);
     }
 
