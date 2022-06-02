@@ -4,7 +4,7 @@
 	export let name: string;
 </script>
 
-<TimeSlider min="0" max="1"/>
+<TimeSlider min="1" max="2"/>
 
 <style>
 	main {

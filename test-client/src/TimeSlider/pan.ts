@@ -1,6 +1,6 @@
 import type {Action} from "./types";
 
-export default function pan(node: HTMLElement): ReturnType<Action> {    
+export default function pan(node: HTMLElement, transform: any): ReturnType<Action> {    
 
     let active: boolean = false;
     let deltaX: number;
@@ -14,19 +14,15 @@ export default function pan(node: HTMLElement): ReturnType<Action> {
         window.addEventListener("mouseup", onUp);        
         active = true;
         var myLeft = node.getBoundingClientRect().left;
-        deltaX = myLeft - event.clientX 
+        deltaX = myLeft - event.clientX;
         node.dispatchEvent(new CustomEvent("panstart"));
     }
 
     function onMove(event: MouseEvent) {
         event.preventDefault();
         if (active) {            
-            const {left, width} = track.getBoundingClientRect();
-            const pos = ((event.clientX + deltaX - left)/width)
-            
-            if (pos >= 0.0 && pos <= 1.0) {
-                node.dispatchEvent(new CustomEvent("pan", {detail: pos}));
-            }
+            const pos = transform(event.clientX + deltaX);
+            node.dispatchEvent(new CustomEvent("pan", {detail: pos}));            
         }
     }
 

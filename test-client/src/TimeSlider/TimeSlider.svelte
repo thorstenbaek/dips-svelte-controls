@@ -3,10 +3,12 @@
 
     export let min: number;
     export let max: number;
-    export let range: number[] = [0.33, 0.66];
-
+    export let range: number[] = [1.33, 1.66];
+    
     let start: number = range[0];
     let end: number = range[1];
+    let scale: number;
+    let trackNode: HTMLElement;
 
     $: setStart(start);
     function setStart(s) {        
@@ -31,28 +33,48 @@
     }
 
     function toPercent(r) {
-        //const width = max - min;
-
-        //return (min + r)/width * 100;
-        return r * 100;
+        const width = max - min;
+        return (r - min)/width * 100;        
     }
 
     $: clamp(min, max)    
-    function clamp(mi, ma) {
+    function clamp(min, max) {
+        scale = max - min;
+        console.log("scale", scale)
         setStart(start);
         setEnd(end);
+    }
+
+    function transform(pos: number): number {
+        const {left, width} = trackNode.getBoundingClientRect();
+        const value = (pos-left)/width*(max-min) + 1;
+
+        console.log("width", width);
+        console.log("left", left);
+        console.log("pos", pos);
+        console.log("value", value);
+        console.log("maxmin", max - min);
+
+        if (value > max) {
+            return max;
+        }
+        else if (value < min) {
+            return min;
+        }
+
+        return value;
     }
 
 </script>
 
 <div class="slider">
     <div on:click={e => min--} class="button left">◀</div>
-    <div class="track">
-        <div use:pan on:pan={e => move(e.detail)} style={`left:${toPercent(range[0])}%;width:${toPercent(range[1]-range[0])}%`} class="range"/>
-        <div use:pan on:pan={e => start = e.detail} class="thumb" style={`left:${toPercent(range[0])}%`}>
+    <div class="track" bind:this={trackNode}>
+        <div use:pan={transform} on:pan={e => move(e.detail)} style={`left:${toPercent(range[0])}%;width:${toPercent(range[1])-toPercent(range[0])}%`} class="range"/>
+        <div use:pan={transform} on:pan={e => start = e.detail} class="thumb" style={`left:${toPercent(range[0])}%`}>
             <div class="thumb-content"/>
         </div>
-        <div use:pan on:pan={e => end = e.detail} class="thumb" style={`left:${toPercent(range[1])}%`}>
+        <div use:pan={transform} on:pan={e => end = e.detail} class="thumb" style={`left:${toPercent(range[1])}%`}>
             <div class="thumb-content"/>
         </div>
     </div>
@@ -60,10 +82,10 @@
 </div>
 
 <p>
-    Range: {range[0]*100}, {range[1]*100}
+    Range: {range[0]}, {range[1]}
 </p>    
 <p>
-    Min/Max: {min*100}, {max*100}
+    Min/Max: {min}, {max}
 </p>
 
 <style>
